@@ -1,0 +1,15 @@
+{
+    "halut_layers": "{\"layer1.2.conv3\": 16}",
+    "layer1.2.conv3.halut_learning_time": 426.2207986973226,
+    "layer1.2.conv3.input_a_shape": [
+        2408448,
+        64
+    ],
+    "layer1.2.conv3.input_b_shape": [
+        64,
+        256
+    ],
+    "top_1_accuracy": 0.8003999590873718,
+    "top_5_accuracy": 0.9506799578666687,
+    "total_time": 3493.72948082909
+}
