@@ -1,0 +1,28 @@
+{
+    "halut_layers": "{\"layer2.3.conv2\": [32, 256, 16]}",
+    "layer2.3.conv2.C": 32,
+    "layer2.3.conv2.H_size": 5632,
+    "layer2.3.conv2.K": 16,
+    "layer2.3.conv2.L_size": 262144,
+    "layer2.3.conv2.learned_a_shape": [
+        200704,
+        1152
+    ],
+    "layer2.3.conv2.learned_b_shape": [
+        1152,
+        128
+    ],
+    "layer2.3.conv2.learned_d": 1152,
+    "layer2.3.conv2.learned_m": 128,
+    "layer2.3.conv2.learned_n": 200704,
+    "layer2.3.conv2.mae": 1.0245501686096192,
+    "layer2.3.conv2.mape": 0.39238997886657717,
+    "layer2.3.conv2.mse": 1.841802134552002,
+    "layer2.3.conv2.rows": 256,
+    "layer2.3.conv2.scaled_error": 0.029989888646602632,
+    "layer2.3.conv2.scaled_shift": 0.0011233225660958123,
+    "layer2.3.conv2.stored_array_size": 24,
+    "top_1_accuracy": 0.7919999957084656,
+    "top_5_accuracy": 0.9453799724578857,
+    "total_time": 133.5057756304741
+}
