@@ -110,6 +110,8 @@ def json_to_dataframe(
     files_res = [x for x in files if pattern.search(x)]
 
     dfs = []  # an empty list to store the data frames
+    if len(files_res) == 0:
+        return pd.DataFrame()
     for file in files_res:
         data = pd.read_json(file)  # read data frame from json file
         if layer_name + ".learned_n" not in data.columns:
@@ -139,6 +141,7 @@ def json_to_dataframe(
         data["hue_string"] = prefix + str(C)
 
         data["test_name"] = layer_name + "-" + str(data.iloc[0][layer_name + ".C"])
+        data["layer_name_canonical"] = layer_name
         data["layer_name"] = layer_name + (
             " (3x3)" if "conv2" in layer_name else " (1x1)"
         )
@@ -587,7 +590,34 @@ def plot_multi_layer() -> None:
     plt.savefig("../figures/multi_layer.png", bbox_inches="tight", dpi=600)
 
 
+def data_to_sql() -> None:
+    data_path = "../data/accuracy/single_layer/c_k_sweep"
+    dfs = []
+    i = 0
+    for l in all_layers:
+        i = i + 1
+        # if i > 12:
+        #     break
+        df = json_to_dataframe(data_path, l)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+    print(df, df.shape)
+    import sqlite3
+
+    con = sqlite3.connect("halutdata.db")
+    df.to_sql("parametersweep", con=con)
+
+    cur = con.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    print(cur.fetchall())
+
+    cur.close()
+    con.close()
+
+
 if __name__ == "__main__":
     # plot_all_layers()
     # plot_comparision()
-    plot_multi_layer()
+    # plot_multi_layer()
+    data_to_sql()
