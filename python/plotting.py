@@ -1,9 +1,10 @@
 import json
 import re
+from typing import Any
 import pandas as pd
 import numpy as np
-import seaborn as sns  # type: ignore[import]
-import matplotlib.pyplot as plt  # type: ignore[import]
+import seaborn as sns
+import matplotlib.pyplot as plt
 import glob
 
 all_layers = [
@@ -100,12 +101,79 @@ layers_interesting = [
     "layer4.2.conv3",
 ]
 
+ds_cnn_layers = [
+    "conv1",
+    "conv2",
+    "conv3",
+    "conv4",
+    "conv5",
+    "conv6",
+    "conv7",
+    "conv8",
+    "conv9",
+]
+
+layers_levit = [
+    "blocks.0.m.qkv",
+    "blocks.0.m.proj.1",
+    "blocks.1.m.0",
+    "blocks.1.m.2",
+    "blocks.2.m.qkv",
+    "blocks.2.m.proj.1",
+    "blocks.3.m.0",
+    "blocks.3.m.2",
+    "blocks.4.kv",
+    "blocks.4.q.1",
+    "blocks.4.proj.1",
+    "blocks.5.m.0",
+    "blocks.5.m.2",
+    "blocks.6.m.qkv",
+    "blocks.6.m.proj.1",
+    "blocks.7.m.0",
+    "blocks.7.m.2",
+    "blocks.8.m.qkv",
+    "blocks.8.m.proj.1",
+    "blocks.9.m.0",
+    "blocks.9.m.2",
+    "blocks.10.m.qkv",
+    "blocks.10.m.proj.1",
+    "blocks.11.m.0",
+    "blocks.11.m.2",
+    "blocks.12.kv",
+    "blocks.12.q.1",
+    "blocks.12.proj.1",
+    "blocks.13.m.0",
+    "blocks.13.m.2",
+    "blocks.14.m.qkv",
+    "blocks.14.m.proj.1",
+    "blocks.15.m.0",
+    "blocks.15.m.2",
+    "blocks.16.m.qkv",
+    "blocks.16.m.proj.1",
+    "blocks.17.m.0",
+    "blocks.17.m.2",
+    "blocks.18.m.qkv",
+    "blocks.18.m.proj.1",
+    "blocks.19.m.0",
+    "blocks.19.m.2",
+    "blocks.20.m.qkv",
+    "blocks.20.m.proj.1",
+    "blocks.21.m.0",
+    "blocks.21.m.2",
+    "head",
+    "head_dist",
+]
+
 
 def json_to_dataframe(
-    path: str, layer_name: str, max_C: int = 128, prefix: str = ""
+    path: str,
+    layer_name: str,
+    max_C: int = 128,
+    prefix: str = "",
+    model: str = "resnet-50",
 ) -> pd.DataFrame:
     files = glob.glob(path + "/*.json")
-    regex = rf"{layer_name}_.+\.json"
+    regex = rf"{layer_name}_\d.+\.json"
     pattern = re.compile(regex)
     files_res = [x for x in files if pattern.search(x)]
 
@@ -154,7 +222,30 @@ def json_to_dataframe(
     )  # concatenate all the data frames in the list.
 
     df = df.drop(columns="halut_layers")
-    df["top_1_accuracy_100"] = df["top_1_accuracy"] * 100
+    if model == "resnet-50":
+        df["top_1_accuracy_100"] = df["top_1_accuracy"] * 100
+    else:
+        df["top_1_accuracy_100"] = df["top_1_accuracy"]
+        df["top_1_accuracy"] = df["top_1_accuracy"] / 100
+
+    layer_info = {}
+    if model == "resnet-50":
+        layer_info = layer_info_resnet
+    elif model == "levit":
+        layer_info = layer_info_levit
+    elif model == "ds-cnn":
+        layer_info = layer_info_ds_cnn
+    df["table_info"] = str(layer_info[layer_name][:2]) + (
+        ""
+        if len(layer_info[layer_name]) == 2
+        else (
+            " ("
+            + str(layer_info[layer_name][2])
+            + "x"
+            + str(layer_info[layer_name][3])
+            + ")"
+        )
+    )
     df.columns = df.columns.str.replace(layer_name + ".", "")
     df.sort_values(
         by=["rows", "test_name"], inplace=True, ignore_index=True, ascending=False
@@ -163,7 +254,7 @@ def json_to_dataframe(
     return df
 
 
-layer_info = {
+layer_info_resnet = {
     "conv1": [64, 3, 7, 7],
     "layer1.0.conv1": [64, 64, 1, 1],
     "layer1.0.conv2": [64, 64, 3, 3],
@@ -221,6 +312,69 @@ layer_info = {
     "layer4.2.conv1": [512, 2048, 1, 1],
     "layer4.2.conv2": [512, 512, 3, 3],
     "layer4.2.conv3": [2048, 512, 1, 1],
+}
+
+layer_info_levit = {
+    "blocks.0.m.qkv": [256, 128],
+    "blocks.0.m.proj.1": [128, 128],
+    "blocks.1.m.0": [256, 128],
+    "blocks.1.m.2": [128, 256],
+    "blocks.2.m.qkv": [256, 128],
+    "blocks.2.m.proj.1": [128, 128],
+    "blocks.3.m.0": [256, 128],
+    "blocks.3.m.2": [128, 256],
+    "blocks.4.kv": [640, 128],
+    "blocks.4.q.1": [128, 128],
+    "blocks.4.proj.1": [256, 512],
+    "blocks.5.m.0": [512, 256],
+    "blocks.5.m.2": [256, 512],
+    "blocks.6.m.qkv": [384, 256],
+    "blocks.6.m.proj.1": [256, 192],
+    "blocks.7.m.0": [512, 256],
+    "blocks.7.m.2": [256, 512],
+    "blocks.8.m.qkv": [384, 256],
+    "blocks.8.m.proj.1": [256, 192],
+    "blocks.9.m.0": [512, 256],
+    "blocks.9.m.2": [256, 512],
+    "blocks.10.m.qkv": [384, 256],
+    "blocks.10.m.proj.1": [256, 192],
+    "blocks.11.m.0": [512, 256],
+    "blocks.11.m.2": [256, 512],
+    "blocks.12.kv": [1280, 256],
+    "blocks.12.q.1": [256, 256],
+    "blocks.12.proj.1": [384, 1024],
+    "blocks.13.m.0": [768, 384],
+    "blocks.13.m.2": [384, 768],
+    "blocks.14.m.qkv": [512, 384],
+    "blocks.14.m.proj.1": [384, 256],
+    "blocks.15.m.0": [768, 384],
+    "blocks.15.m.2": [384, 768],
+    "blocks.16.m.qkv": [512, 384],
+    "blocks.16.m.proj.1": [384, 256],
+    "blocks.17.m.0": [768, 384],
+    "blocks.17.m.2": [384, 768],
+    "blocks.18.m.qkv": [512, 384],
+    "blocks.18.m.proj.1": [384, 256],
+    "blocks.19.m.0": [768, 384],
+    "blocks.19.m.2": [384, 768],
+    "blocks.20.m.qkv": [512, 384],
+    "blocks.20.m.proj.1": [384, 256],
+    "blocks.21.m.0": [768, 384],
+    "blocks.21.m.2": [384, 768],
+    "head": [1000, 384],
+    "head_dist": [1000, 384],
+}
+
+layer_info_ds_cnn = {
+    "conv1": [64, 1, 10, 4],
+    "conv2": [64, 1, 3, 3],
+    "conv3": [64, 64, 1, 1],
+    "conv4": [64, 1, 3, 3],
+    "conv5": [64, 64, 1, 1],
+    "conv6": [64, 1, 3, 3],
+    "conv7": [64, 64, 1, 1],
+    "conv8": [64, 1, 3, 3],
+    "conv9": [64, 64, 1, 1],
 }
 
 
@@ -590,19 +744,119 @@ def plot_multi_layer() -> None:
     plt.savefig("../figures/multi_layer.png", bbox_inches="tight", dpi=600)
 
 
+def create_string(input: Any) -> str:
+    return f"{input[0]:.2f} ({input[1]:.2f})"
+
+
+def create_tables() -> None:
+    df_32 = pd.read_csv("export.csv")
+    ref_acc = {"resnet-50": 80.858, "levit": 76.520, "ds-cnn": 92.94}
+    for m in ["ds-cnn", "levit", "resnet-50"]:
+        df_m = df_32[df_32["model"] == m].copy()
+        df_m["accuracy_enc_0"] = 0.0
+        df_m["accuracy_enc_1"] = 0.0
+        df_m["accuracy_enc_2"] = 0.0
+        for name in pd.unique(df_m["layer_name_canonical"]):
+            data = df_m.loc[df_m["layer_name_canonical"] == name]
+            accuracies = [0.0, 0.0, 0.0]
+            for enc in range(3):
+                acc = data.loc[
+                    data["encoding_algorithm"] == float(enc), "top_1_accuracy_100"
+                ].values
+                accuracies[enc] = acc[0]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "accuracy_enc_0"
+            ] = accuracies[0]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "accuracy_enc_1"
+            ] = accuracies[1]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "accuracy_enc_2"
+            ] = accuracies[2]
+
+        df_m.drop_duplicates(
+            subset=["layer_name_canonical"], keep="first", inplace=True
+        )
+        df_m["d_int"] = df_m["learned_d"].astype(int)
+        df_m["acc_enc_0_diff"] = df_m["accuracy_enc_0"] - ref_acc[m]
+        df_m["acc_enc_1_diff"] = df_m["accuracy_enc_1"] - ref_acc[m]
+        df_m["acc_enc_2_diff"] = df_m["accuracy_enc_2"] - ref_acc[m]
+
+        df_m["acc_enc_0_text"] = df_m[["accuracy_enc_0", "acc_enc_0_diff"]].apply(
+            create_string, axis=1
+        )
+        df_m["acc_enc_1_text"] = df_m[["accuracy_enc_1", "acc_enc_1_diff"]].apply(
+            create_string, axis=1
+        )
+        df_m["acc_enc_2_text"] = df_m[["accuracy_enc_2", "acc_enc_2_diff"]].apply(
+            create_string, axis=1
+        )
+
+        df_table = df_m[
+            [
+                "layer_name_canonical",
+                "table_info",
+                "d_int",
+                "acc_enc_0_text",
+                "acc_enc_1_text",
+                "acc_enc_2_text",
+            ]
+        ]
+        df_table.to_latex(
+            "../tables/" + m + ".tex",
+            float_format="%.2f",
+            header=["Name", "[In, Out]", "D", "Madd [%]", "DT [%]", "PQ [%]"],
+            index=False,
+        )
+
+
 def data_to_sql() -> None:
-    data_path = "../data/accuracy/single_layer/c_k_sweep"
+    data_paths = {
+        "resnet-50": "../data/accuracy/single_layer/c_k_sweep",
+        "levit": "../data/accuracy/single_layer/levit",
+        "ds-cnn": "../data/accuracy/single_layer/ds-cnn",
+    }
+    layers_dict = {
+        "resnet-50": all_layers,
+        "levit": layers_levit,
+        "ds-cnn": ds_cnn_layers,
+    }
     dfs = []
     i = 0
-    for l in all_layers:
-        i = i + 1
-        # if i > 12:
-        #     break
-        df = json_to_dataframe(data_path, l)
-        dfs.append(df)
+    for m in ["ds-cnn", "levit", "resnet-50"]:
+        layers = layers_dict[m]
+        for l in layers:
+            i = i + 1
+            # if i > 12:
+            #     break
+            df = json_to_dataframe(data_paths[m], l, model=m)
+            df["model"] = m
+            dfs.append(df)
 
     df = pd.concat(dfs)
     print(df, df.shape)
+
+    # tables
+    df_32 = df[(df["C"] == 32) & (df["K"] == 16)]
+
+    df_32.sort_values(
+        by=["top_1_accuracy"], inplace=True, ignore_index=True, ascending=False
+    )
+    df_32.drop_duplicates(
+        subset=["model", "layer_name_canonical", "encoding_algorithm"],
+        keep="first",
+        inplace=True,
+    )
+    df_32.sort_values(
+        by=["layer_name_canonical"], inplace=True, ignore_index=True, ascending=True
+    )
+
+    print(df_32)
+
+    df_32.to_csv("export.csv")
+
+    # create_tables()
+
     import sqlite3
 
     con = sqlite3.connect("halutdata.db")
@@ -620,4 +874,5 @@ if __name__ == "__main__":
     # plot_all_layers()
     # plot_comparision()
     # plot_multi_layer()
-    data_to_sql()
+    # data_to_sql()
+    create_tables()
