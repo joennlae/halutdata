@@ -1,6 +1,7 @@
 import json
+from math import ceil, sqrt
 import re
-from typing import Any
+from typing import Any, Literal
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -246,6 +247,8 @@ def json_to_dataframe(
             + ")"
         )
     )
+    df["in_channels"] = layer_info[layer_name][0]
+    df["out_channels"] = layer_info[layer_name][1]
     df.columns = df.columns.str.replace(layer_name + ".", "")
     df.sort_values(
         by=["rows", "test_name"], inplace=True, ignore_index=True, ascending=False
@@ -744,8 +747,76 @@ def plot_multi_layer() -> None:
     plt.savefig("../figures/multi_layer.png", bbox_inches="tight", dpi=600)
 
 
-def create_string(input: Any) -> str:
-    return f"{input[0]:.2f} ({input[1]:.2f})"
+def create_string(input: Any) -> float:
+    # return f"{input[0]:.2f} ({input[1]:.2f})"
+    return input[1]
+
+
+def calc_flops(
+    N: int, D: int, M: int, C: int, K: int, type_: Literal["gemm", 0, 1, 2]
+) -> int:
+    if type_ == "gemm":
+        return 2 * N * D * M
+    elif type_ == 0:  # Maddness
+        return N * C * (ceil(sqrt(K)) + M)
+    elif type_ == 1:  # DT
+        return N * C * (ceil(sqrt(K)) + M)
+    elif type_ == 2:  # PQ
+        return N * C * M + N * C * K * ceil(D / C) * 3
+
+
+def get_read_and_writes(
+    N: int, D: int, M: int, C: int, K: int, type_: Literal["gemm", 0, 1, 2]
+) -> int:
+    if type_ == "gemm":
+        return 2 * (M * D + N * D + M * N)
+    elif type_ == 0:  # Maddness
+        return N * C * (ceil(sqrt(K)) + 1) + N * M * (C + 1)
+    elif type_ == 1:  # DT
+        return N * C * (ceil(sqrt(K)) + 2) + N * M * (
+            C + 1
+        )  # one lookup more at the end of encoding
+    elif type_ == 2:  # PQ
+        return N * C * (ceil(D / C) + K * ceil(D / C)) + N * C + N * M * (C + 1)
+
+
+def calc_flops_gemm_row(input: Any) -> int:
+    return calc_flops(
+        int(input["learned_n"]) // int(input["rows"]),
+        int(input["learned_d"]),
+        int(input["learned_m"]),
+        min(int(input["learned_d"]), int(input["C"])),
+        int(input["K"]),
+        "gemm",
+    )
+
+
+def calc_flops_gemm_enc(input: Any) -> int:
+    return calc_flops(
+        int(input["learned_n"]) // int(input["rows"]),
+        int(input["learned_d"]),
+        int(input["learned_m"]),
+        min(int(input["learned_d"]), int(input["C"])),
+        int(input["K"]),
+        int(input["encoding_algorithm"]),  # type: ignore[arg-type]
+    )
+
+
+def formatter_acc_reduction(input: Any) -> str:
+    color = "green"
+    input_num = float(input)
+    if input_num < -1.0:
+        color = "orange"
+    if input_num < -5.0:
+        color = "red"
+    return r"\textcolor{" + color + "}{" + input + "}"
+
+
+def formatter_remove_parts(input: str) -> str:
+    input = input.replace("blocks.", "")
+    input = input.replace("layer", "")
+    input = input.replace("downsample", "down")
+    return input
 
 
 def create_tables() -> None:
@@ -753,17 +824,39 @@ def create_tables() -> None:
     ref_acc = {"resnet-50": 80.858, "levit": 76.520, "ds-cnn": 92.94}
     for m in ["ds-cnn", "levit", "resnet-50"]:
         df_m = df_32[df_32["model"] == m].copy()
+        df_m["flops_gemm"] = df_m.apply(calc_flops_gemm_row, axis=1)
+        df_m["flops_halut"] = df_m.apply(calc_flops_gemm_enc, axis=1)
+        df_m["flops_reduction"] = df_m["flops_gemm"] / df_m["flops_halut"]
         df_m["accuracy_enc_0"] = 0.0
         df_m["accuracy_enc_1"] = 0.0
         df_m["accuracy_enc_2"] = 0.0
+        df_m["flops_reduction_0"] = 0.0
+        df_m["flops_reduction_1"] = 0.0
+        df_m["flops_reduction_2"] = 0.0
+
+        df_m["scaled_error_0"] = 0.0
+        df_m["scaled_error_1"] = 0.0
+        df_m["scaled_error_2"] = 0.0
+
+        print(df_m[["flops_halut", "flops_gemm"]])
         for name in pd.unique(df_m["layer_name_canonical"]):
             data = df_m.loc[df_m["layer_name_canonical"] == name]
             accuracies = [0.0, 0.0, 0.0]
+            flops_reductions = [0.0, 0.0, 0.0]
+            scaled_errors = [0.0, 0.0, 0.0]
             for enc in range(3):
                 acc = data.loc[
                     data["encoding_algorithm"] == float(enc), "top_1_accuracy_100"
                 ].values
                 accuracies[enc] = acc[0]
+                red = data.loc[
+                    data["encoding_algorithm"] == float(enc), "flops_reduction"
+                ].values
+                flops_reductions[enc] = red[0]
+                err = data.loc[
+                    data["encoding_algorithm"] == float(enc), "scaled_error"
+                ].values
+                scaled_errors[enc] = err[0]
             df_m.loc[
                 df_m["layer_name_canonical"] == name, "accuracy_enc_0"
             ] = accuracies[0]
@@ -773,6 +866,26 @@ def create_tables() -> None:
             df_m.loc[
                 df_m["layer_name_canonical"] == name, "accuracy_enc_2"
             ] = accuracies[2]
+
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "flops_reduction_0"
+            ] = flops_reductions[0]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "flops_reduction_1"
+            ] = flops_reductions[1]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "flops_reduction_2"
+            ] = flops_reductions[2]
+
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "scaled_error_0"
+            ] = scaled_errors[0]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "scaled_error_1"
+            ] = scaled_errors[1]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "scaled_error_2"
+            ] = scaled_errors[2]
 
         df_m.drop_duplicates(
             subset=["layer_name_canonical"], keep="first", inplace=True
@@ -792,21 +905,97 @@ def create_tables() -> None:
             create_string, axis=1
         )
 
+        df_m["layer_name_table"] = df_m["layer_name_canonical"].apply(
+            formatter_remove_parts
+        )
+
+        df_m["lut_kb"] = df_m["L_size"] // 1024
+
         df_table = df_m[
             [
-                "layer_name_canonical",
+                "layer_name_table",
                 "table_info",
                 "d_int",
                 "acc_enc_0_text",
                 "acc_enc_1_text",
                 "acc_enc_2_text",
+                "flops_reduction_0",
+                # "flops_reduction_1",
+                "flops_reduction_2",
+                "lut_kb",
+                "scaled_error_0",
+                "scaled_error_1",
+                "scaled_error_2",
             ]
         ]
-        df_table.to_latex(
+
+        cidx = pd.MultiIndex.from_arrays(
+            [
+                [
+                    "Name",
+                    "[Out, In]",
+                    "D",
+                    "Accuracy drop [%]",
+                    "Accuracy drop [%]",
+                    "Accuracy drop [%]",
+                    "FLOPs [x]",
+                    "FLOPs [x]",
+                    "LUT",
+                    "Scaled error",
+                    "Scaled error",
+                    "Scaled error",
+                ],
+                [
+                    "",
+                    "",
+                    "",
+                    "Madd",
+                    "DT",
+                    "PQ",
+                    "M&DT",
+                    "PQ",
+                    "[kB]",
+                    "Madd",
+                    "DT",
+                    "PQ",
+                ],
+            ]
+        )
+        df_table.columns = cidx
+        print(df_table.head(5))
+        styler = df_table.style
+        styler.format(subset="Accuracy drop [%]", precision=2).format(
+            subset="FLOPs [x]", precision=1
+        ).format(subset="LUT", precision=0).format(
+            "{:.1E}", subset="Scaled error"
+        ).format_index(
+            escape="latex", axis=1
+        ).format_index(
+            escape="latex", axis=0
+        ).hide(
+            level=0, axis=0
+        )
+        styler.background_gradient(
+            axis=None,
+            cmap="RdYlGn",
+            high=0.8,
+            subset=["Accuracy drop [%]"],
+        )
+        styler.background_gradient(
+            axis=None,
+            cmap="RdYlGn_r",
+            low=0.5,
+            subset=["Scaled error"],
+        )
+        print(df_table.head(5))
+        styler.to_latex(
             "../tables/" + m + ".tex",
-            float_format="%.2f",
-            header=["Name", "[In, Out]", "D", "Madd [%]", "DT [%]", "PQ [%]"],
-            index=False,
+            clines="skip-last;data",
+            convert_css=True,
+            position_float="centering",
+            multicol_align="|c|",
+            hrules=True,
+            # float_format="%.2f",
         )
 
 
