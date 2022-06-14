@@ -752,6 +752,10 @@ def create_string(input: Any) -> float:
     return input[1]
 
 
+def create_string_flops_rw(input: Any) -> str:
+    return f"{input[0]:.1f} ({input[1]:.1f})"
+
+
 def calc_flops(
     N: int, D: int, M: int, C: int, K: int, type_: Literal["gemm", 0, 1, 2]
 ) -> int:
@@ -766,18 +770,28 @@ def calc_flops(
 
 
 def get_read_and_writes(
-    N: int, D: int, M: int, C: int, K: int, type_: Literal["gemm", 0, 1, 2]
+    N: int,
+    D: int,
+    M: int,
+    C: int,
+    K: int,
+    type_: Literal["gemm", 0, 1, 2],
+    dtype_byte_width: int = 4,
 ) -> int:
+    read_write_accesses = 0
     if type_ == "gemm":
-        return 2 * (M * D + N * D + M * N)
+        read_write_accesses = M * D + N * D + M * N
     elif type_ == 0:  # Maddness
-        return N * C * (ceil(sqrt(K)) + 1) + N * M * (C + 1)
+        read_write_accesses = N * C * (ceil(sqrt(K)) + 1) + N * M * (C + 1)
     elif type_ == 1:  # DT
-        return N * C * (ceil(sqrt(K)) + 2) + N * M * (
+        read_write_accesses = N * C * (ceil(sqrt(K)) + 2) + N * M * (
             C + 1
         )  # one lookup more at the end of encoding
     elif type_ == 2:  # PQ
-        return N * C * (ceil(D / C) + K * ceil(D / C)) + N * C + N * M * (C + 1)
+        read_write_accesses = (
+            N * C * (ceil(D / C) + K * ceil(D / C)) + N * C + N * M * (C + 1)
+        )
+    return dtype_byte_width * read_write_accesses
 
 
 def calc_flops_gemm_row(input: Any) -> int:
@@ -793,6 +807,28 @@ def calc_flops_gemm_row(input: Any) -> int:
 
 def calc_flops_gemm_enc(input: Any) -> int:
     return calc_flops(
+        int(input["learned_n"]) // int(input["rows"]),
+        int(input["learned_d"]),
+        int(input["learned_m"]),
+        min(int(input["learned_d"]), int(input["C"])),
+        int(input["K"]),
+        int(input["encoding_algorithm"]),  # type: ignore[arg-type]
+    )
+
+
+def calc_rw_gemm_row(input: Any) -> int:
+    return get_read_and_writes(
+        int(input["learned_n"]) // int(input["rows"]),
+        int(input["learned_d"]),
+        int(input["learned_m"]),
+        min(int(input["learned_d"]), int(input["C"])),
+        int(input["K"]),
+        "gemm",
+    )
+
+
+def calc_rw_enc(input: Any) -> int:
+    return get_read_and_writes(
         int(input["learned_n"]) // int(input["rows"]),
         int(input["learned_d"]),
         int(input["learned_m"]),
@@ -827,12 +863,20 @@ def create_tables() -> None:
         df_m["flops_gemm"] = df_m.apply(calc_flops_gemm_row, axis=1)
         df_m["flops_halut"] = df_m.apply(calc_flops_gemm_enc, axis=1)
         df_m["flops_reduction"] = df_m["flops_gemm"] / df_m["flops_halut"]
+        df_m["read_write_bytes_gemm"] = df_m.apply(calc_rw_gemm_row, axis=1)
+        df_m["read_write_bytes_halut"] = df_m.apply(calc_rw_enc, axis=1)
+        df_m["read_write_bytes_more"] = (
+            df_m["read_write_bytes_halut"] / df_m["read_write_bytes_gemm"]
+        )
         df_m["accuracy_enc_0"] = 0.0
         df_m["accuracy_enc_1"] = 0.0
         df_m["accuracy_enc_2"] = 0.0
         df_m["flops_reduction_0"] = 0.0
         df_m["flops_reduction_1"] = 0.0
         df_m["flops_reduction_2"] = 0.0
+        df_m["rw_more_0"] = 0.0
+        df_m["rw_more_1"] = 0.0
+        df_m["rw_more_2"] = 0.0
 
         df_m["scaled_error_0"] = 0.0
         df_m["scaled_error_1"] = 0.0
@@ -844,6 +888,7 @@ def create_tables() -> None:
             accuracies = [0.0, 0.0, 0.0]
             flops_reductions = [0.0, 0.0, 0.0]
             scaled_errors = [0.0, 0.0, 0.0]
+            rw_mores = [0.0, 0.0, 0.0]
             for enc in range(3):
                 acc = data.loc[
                     data["encoding_algorithm"] == float(enc), "top_1_accuracy_100"
@@ -857,6 +902,11 @@ def create_tables() -> None:
                     data["encoding_algorithm"] == float(enc), "scaled_error"
                 ].values
                 scaled_errors[enc] = err[0]
+                rw = data.loc[
+                    data["encoding_algorithm"] == float(enc),
+                    "read_write_bytes_more",
+                ].values
+                rw_mores[enc] = rw[0]
             df_m.loc[
                 df_m["layer_name_canonical"] == name, "accuracy_enc_0"
             ] = accuracies[0]
@@ -887,6 +937,10 @@ def create_tables() -> None:
                 df_m["layer_name_canonical"] == name, "scaled_error_2"
             ] = scaled_errors[2]
 
+            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_0"] = rw_mores[0]
+            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_1"] = rw_mores[1]
+            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_2"] = rw_mores[2]
+
         df_m.drop_duplicates(
             subset=["layer_name_canonical"], keep="first", inplace=True
         )
@@ -905,6 +959,16 @@ def create_tables() -> None:
             create_string, axis=1
         )
 
+        df_m["flops_rw_text_0"] = df_m[["flops_reduction_0", "rw_more_0"]].apply(
+            create_string_flops_rw, axis=1
+        )
+        df_m["flops_rw_text_1"] = df_m[["flops_reduction_1", "rw_more_1"]].apply(
+            create_string_flops_rw, axis=1
+        )
+        df_m["flops_rw_text_2"] = df_m[["flops_reduction_2", "rw_more_2"]].apply(
+            create_string_flops_rw, axis=1
+        )
+
         df_m["layer_name_table"] = df_m["layer_name_canonical"].apply(
             formatter_remove_parts
         )
@@ -919,9 +983,8 @@ def create_tables() -> None:
                 "acc_enc_0_text",
                 "acc_enc_1_text",
                 "acc_enc_2_text",
-                "flops_reduction_0",
-                # "flops_reduction_1",
-                "flops_reduction_2",
+                "flops_rw_text_0",
+                "flops_rw_text_2",
                 "lut_kb",
                 "scaled_error_0",
                 "scaled_error_1",
@@ -938,8 +1001,8 @@ def create_tables() -> None:
                     "Accuracy drop [%]",
                     "Accuracy drop [%]",
                     "Accuracy drop [%]",
-                    "FLOPs [x]",
-                    "FLOPs [x]",
+                    "FLOPs (RW) [x]",
+                    "FLOPs (RW) [x]",
                     "LUT",
                     "Scaled error",
                     "Scaled error",
@@ -965,10 +1028,8 @@ def create_tables() -> None:
         print(df_table.head(5))
         styler = df_table.style
         styler.format(subset="Accuracy drop [%]", precision=2).format(
-            subset="FLOPs [x]", precision=1
-        ).format(subset="LUT", precision=0).format(
-            "{:.1E}", subset="Scaled error"
-        ).format_index(
+            subset="LUT", precision=0
+        ).format("{:.1E}", subset="Scaled error").format_index(
             escape="latex", axis=1
         ).format_index(
             escape="latex", axis=0
