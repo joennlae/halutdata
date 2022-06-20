@@ -782,14 +782,17 @@ def get_read_and_writes(
     if type_ == "gemm":
         read_write_accesses = M * D + N * D + M * N
     elif type_ == 0:  # Maddness
-        read_write_accesses = N * C * (ceil(sqrt(K)) + 1) + N * M * (C + 1)
+        # remove LUT reads = N * M * C
+        read_write_accesses = N * D + N * M * (1)
     elif type_ == 1:  # DT
-        read_write_accesses = N * C * (ceil(sqrt(K)) + 2) + N * M * (
-            C + 1
+        # remove LUT reads = N * M * C
+        read_write_accesses = N * D + N * M * (
+            1
         )  # one lookup more at the end of encoding
     elif type_ == 2:  # PQ
+        # remove LUT reads = N * M * C
         read_write_accesses = (
-            N * C * (ceil(D / C) + K * ceil(D / C)) + N * C + N * M * (C + 1)
+            N * C * (ceil(D / C) + K * ceil(D / C)) + N * C + N * M * (1)
         )
     return dtype_byte_width * read_write_accesses
 
@@ -860,13 +863,14 @@ def create_tables() -> None:
     ref_acc = {"resnet-50": 80.858, "levit": 76.520, "ds-cnn": 92.94}
     for m in ["ds-cnn", "levit", "resnet-50"]:
         df_m = df_32[df_32["model"] == m].copy()
+        df_m["N"] = df_m["learned_n"] // df_m["rows"]
         df_m["flops_gemm"] = df_m.apply(calc_flops_gemm_row, axis=1)
         df_m["flops_halut"] = df_m.apply(calc_flops_gemm_enc, axis=1)
         df_m["flops_reduction"] = df_m["flops_gemm"] / df_m["flops_halut"]
         df_m["read_write_bytes_gemm"] = df_m.apply(calc_rw_gemm_row, axis=1)
         df_m["read_write_bytes_halut"] = df_m.apply(calc_rw_enc, axis=1)
-        df_m["read_write_bytes_more"] = (
-            df_m["read_write_bytes_halut"] / df_m["read_write_bytes_gemm"]
+        df_m["read_write_bytes_reduction"] = (
+            df_m["read_write_bytes_gemm"] / df_m["read_write_bytes_halut"]
         )
         df_m["accuracy_enc_0"] = 0.0
         df_m["accuracy_enc_1"] = 0.0
@@ -874,9 +878,9 @@ def create_tables() -> None:
         df_m["flops_reduction_0"] = 0.0
         df_m["flops_reduction_1"] = 0.0
         df_m["flops_reduction_2"] = 0.0
-        df_m["rw_more_0"] = 0.0
-        df_m["rw_more_1"] = 0.0
-        df_m["rw_more_2"] = 0.0
+        df_m["rw_reduction_0"] = 0.0
+        df_m["rw_reduction_1"] = 0.0
+        df_m["rw_reduction_2"] = 0.0
 
         df_m["scaled_error_0"] = 0.0
         df_m["scaled_error_1"] = 0.0
@@ -888,7 +892,7 @@ def create_tables() -> None:
             accuracies = [0.0, 0.0, 0.0]
             flops_reductions = [0.0, 0.0, 0.0]
             scaled_errors = [0.0, 0.0, 0.0]
-            rw_mores = [0.0, 0.0, 0.0]
+            rw_reductions = [0.0, 0.0, 0.0]
             for enc in range(3):
                 acc = data.loc[
                     data["encoding_algorithm"] == float(enc), "top_1_accuracy_100"
@@ -904,9 +908,9 @@ def create_tables() -> None:
                 scaled_errors[enc] = err[0]
                 rw = data.loc[
                     data["encoding_algorithm"] == float(enc),
-                    "read_write_bytes_more",
+                    "read_write_bytes_reduction",
                 ].values
-                rw_mores[enc] = rw[0]
+                rw_reductions[enc] = rw[0]
             df_m.loc[
                 df_m["layer_name_canonical"] == name, "accuracy_enc_0"
             ] = accuracies[0]
@@ -937,9 +941,15 @@ def create_tables() -> None:
                 df_m["layer_name_canonical"] == name, "scaled_error_2"
             ] = scaled_errors[2]
 
-            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_0"] = rw_mores[0]
-            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_1"] = rw_mores[1]
-            df_m.loc[df_m["layer_name_canonical"] == name, "rw_more_2"] = rw_mores[2]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "rw_reduction_0"
+            ] = rw_reductions[0]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "rw_reduction_1"
+            ] = rw_reductions[1]
+            df_m.loc[
+                df_m["layer_name_canonical"] == name, "rw_reduction_2"
+            ] = rw_reductions[2]
 
         df_m.drop_duplicates(
             subset=["layer_name_canonical"], keep="first", inplace=True
@@ -959,13 +969,13 @@ def create_tables() -> None:
             create_string, axis=1
         )
 
-        df_m["flops_rw_text_0"] = df_m[["flops_reduction_0", "rw_more_0"]].apply(
+        df_m["flops_rw_text_0"] = df_m[["flops_reduction_0", "rw_reduction_0"]].apply(
             create_string_flops_rw, axis=1
         )
-        df_m["flops_rw_text_1"] = df_m[["flops_reduction_1", "rw_more_1"]].apply(
+        df_m["flops_rw_text_1"] = df_m[["flops_reduction_1", "rw_reduction_1"]].apply(
             create_string_flops_rw, axis=1
         )
-        df_m["flops_rw_text_2"] = df_m[["flops_reduction_2", "rw_more_2"]].apply(
+        df_m["flops_rw_text_2"] = df_m[["flops_reduction_2", "rw_reduction_2"]].apply(
             create_string_flops_rw, axis=1
         )
 
@@ -1058,6 +1068,8 @@ def create_tables() -> None:
             hrules=True,
             # float_format="%.2f",
         )
+
+        df_m.to_csv(m + ".csv")
 
 
 def data_to_sql() -> None:
