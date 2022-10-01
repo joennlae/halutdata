@@ -224,7 +224,7 @@ def json_to_dataframe(
 
     df = df.drop(columns="halut_layers")
     if model == "resnet-50":
-        df["top_1_accuracy_100"] = df["top_1_accuracy"] * 100
+        df["top_1_accuracy_100"] = df["top_1_accuracy"]  # * 100
     else:
         df["top_1_accuracy_100"] = df["top_1_accuracy"]
         df["top_1_accuracy"] = df["top_1_accuracy"] / 100
@@ -381,11 +381,47 @@ layer_info_ds_cnn = {
 }
 
 
+layer_info_resnet_18_layers = {
+  # out, in , kernel_size
+  "layer1.0.conv1": [64, 64, 3, 3],
+  "layer1.0.conv2": [64, 64, 3, 3],
+  "layer1.1.conv1": [64, 64, 3, 3],
+  "layer1.1.conv2": [64, 64, 3, 3],
+  "layer2.0.conv1": [128, 64, 3, 3],
+  "layer2.0.conv2": [128, 128, 3, 3],
+  "layer2.0.downsample.0": [128, 64, 1, 1],
+  "layer2.1.conv1": [128, 128, 3, 3],
+  "layer2.1.conv2": [128, 128, 3, 3],
+  "layer3.0.conv1": [256, 128, 3, 3],
+  "layer3.0.conv2": [256, 256, 3, 3],
+  "layer3.0.downsample.0": [256, 128, 1, 1],
+  "layer3.1.conv1": [256, 256, 3, 3],
+  "layer3.1.conv2": [256, 256, 3, 3],
+  "layer4.0.conv1": [512, 256, 3, 3],
+  "layer4.0.conv2": [512, 512, 3, 3],
+  "layer4.0.downsample.0": [512, 256, 1, 1],
+  "layer4.1.conv1": [512, 512, 3, 3],
+  "layer4.1.conv2": [512, 512, 3, 3],
+  "fc": [100, 512], # 100 for cifar-100
+}
+
 def calculate_MACs(layer_name: str, df: pd.DataFrame) -> int:
     N = df[layer_name + ".learned_n"] / df[layer_name + ".rows"]
     D = df[layer_name + ".learned_d"]
     M = df[layer_name + ".learned_m"]
 
+    return N * D * M
+
+def calculate_MACs_resnet(layer_name: str, df: pd.DataFrame, N: int = 256) -> int:
+    layer_info = layer_info_resnet_18_layers[layer_name]
+    if len(layer_info) > 2:
+        # conv
+        D = layer_info[2] * layer_info[3] * layer_info[1]
+        M = layer_info[0]
+    else:
+        # linear
+        D = layer_info[1]
+        M = layer_info[0]
     return N * D * M
 
 
@@ -435,7 +471,7 @@ def json_to_dataframe_macs(path: str, max_C: int = 16) -> pd.DataFrame:
     )  # concatenate all the data frames in the list.
 
     df = df.drop(columns="halut_layers")
-    df["top_1_accuracy_100"] = df["top_1_accuracy"] * 100
+    df["top_1_accuracy_100"] = df["top_1_accuracy"]  #  * 100
     df.sort_values(by=["macs"], inplace=True, ignore_index=True, ascending=False)
     print("TOTAL MACS", total_macs)
     return df
@@ -453,6 +489,7 @@ def json_to_multi_layer(path: str, max_C: int = 128, prefix: str = "") -> pd.Dat
         if C > max_C:
             continue
         saved_macs = 0
+        print(data)
         for layer_name in layers.keys():
             if layer_name + ".learned_a_shape" in data.columns:
                 data = data.drop(
@@ -461,12 +498,13 @@ def json_to_multi_layer(path: str, max_C: int = 128, prefix: str = "") -> pd.Dat
                         layer_name + ".learned_b_shape",
                     ]
                 )
-            macs_layer = calculate_MACs(layer_name, data)
+            macs_layer = calculate_MACs_resnet(layer_name, data, N=256) # n is not correct but would need more infos
             saved_macs += macs_layer
             data[layer_name + ".macs"] = macs_layer
         data["num_replaced_layers"] = len(list(layers.keys()))
-
-        data["hue_string"] = prefix + str(C)
+        data["last_replaced"] = list(layers.keys())[0]
+        data["hue_string"] = "retrained" if "_trained" in file else "replaced"
+        print(file, data["hue_string"])
         data["saved_macs"] = saved_macs
         dfs.append(data)  # append the data frame to the list
 
@@ -475,7 +513,7 @@ def json_to_multi_layer(path: str, max_C: int = 128, prefix: str = "") -> pd.Dat
     )  # concatenate all the data frames in the list.
 
     df = df.drop(columns="halut_layers")
-    df["top_1_accuracy_100"] = df["top_1_accuracy"] * 100
+    df["top_1_accuracy_100"] = df["top_1_accuracy"]  # * 100
     df.sort_values(
         by=["num_replaced_layers"], inplace=True, ignore_index=True, ascending=True
     )
@@ -517,7 +555,7 @@ def plot_all_layers() -> None:
         col="layer_name",
         hue="C",
         palette=customPalette,
-        col_wrap=4,
+        col_wrap=6,
         height=2.5,
         legend_out=True,
     )
@@ -708,12 +746,47 @@ def plot_comparision() -> None:
     plt.savefig("../figures/comp_new_old.png", bbox_inches="tight", dpi=600)
 
 
-def plot_multi_layer() -> None:
-    data_path_1 = "../data/accuracy/multi_layer"
-    data_path_2 = "../data/accuracy/single_layer/training_data"
+def plot_retraining() -> None:
+    data_path_1 = "../data/resnet18-cifar100_real"
     df = json_to_multi_layer(data_path_1, 64)
+    print(df)
+    sns.set_context("paper")
+    sns.set(font="serif")
+    sns.set_style(
+        "whitegrid",
+        # {"font.family": "serif", "font.serif": ["Times", "Palatino", "serif"]},
+    )
+    plt.figure(figsize=(14, 8))
+    print(df["last_replaced"])
+    plot = sns.barplot(
+        data=df[df["hue_string"] == "retrained"],
+        x="last_replaced",
+        y="top_1_accuracy_100",
+        color="lightgreen"
+    )
+    plot2 = sns.barplot(
+        data=df[df["hue_string"] == "replaced"],
+        x="last_replaced",
+        y="top_1_accuracy_100",
+        color="lightblue"
+    )
+    RESNET_ACC = 68.250
+    # Draw a horizontal line to show the starting point
+    plt.hlines(y=RESNET_ACC, linestyle=":", color="red", xmin=0.0, xmax=19)
+    plt.xticks(rotation=90)
+    plot2.set_ylabel("Top1 Accuracy [%]")
+    plot2.set_xlabel("Replaced Layers")
+    plot2.set_title("ResNet18 CIFAR-100 Replace&Freeze Retraining")
+    plt.savefig("../figures/retrained.pdf", bbox_inches="tight", dpi=600)
+    plt.savefig("../figures/retrained.png", bbox_inches="tight", dpi=600)
+
+def plot_multi_layer() -> None:
+    data_path_1 = "../data/resnet18-cifar100_real"
+    data_path_2 = "../data/accuracy/single_layer/training_data"
+    df = json_to_multi_layer(data_path_1, 32)
 
     print(df)
+    df.to_csv("out.csv")
     print(df["saved_macs"])
     sns.set_context("paper")
     sns.set(font="serif")
@@ -728,7 +801,7 @@ def plot_multi_layer() -> None:
     grid.set_xlabel("MACs saved")
     grid.set_ylabel("Accuracy")
     grid.set(xlim=(0, 1.7e9))
-    RESNET_ACC = 80.858
+    RESNET_ACC = 68.250
     # Draw a horizontal line to show the starting point
     grid.hlines(y=RESNET_ACC, linestyle=":", color="red", xmin=0, xmax=2.0e9)
 
@@ -740,7 +813,7 @@ def plot_multi_layer() -> None:
 
     secax = grid.secondary_xaxis("top", functions=(forward, inverse))
     secax.set_xlabel("MACs saved in %")
-    RESNET_ACC = 80.858
+    RESNET_ACC = 68.250
     # Draw a horizontal line to show the starting point
     # grid.refline(y=RESNET_ACC, linestyle=":", color="red")
     plt.savefig("../figures/multi_layer.pdf", bbox_inches="tight", dpi=600)
@@ -1137,4 +1210,5 @@ if __name__ == "__main__":
     # plot_comparision()
     # plot_multi_layer()
     # data_to_sql()
-    create_tables()
+    # create_tables()
+    plot_retraining()
