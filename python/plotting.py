@@ -382,28 +382,84 @@ layer_info_ds_cnn = {
 
 
 layer_info_resnet_18_layers = {
-  # out, in , kernel_size
-  "layer1.0.conv1": [64, 64, 3, 3],
-  "layer1.0.conv2": [64, 64, 3, 3],
-  "layer1.1.conv1": [64, 64, 3, 3],
-  "layer1.1.conv2": [64, 64, 3, 3],
-  "layer2.0.conv1": [128, 64, 3, 3],
-  "layer2.0.conv2": [128, 128, 3, 3],
-  "layer2.0.downsample.0": [128, 64, 1, 1],
-  "layer2.1.conv1": [128, 128, 3, 3],
-  "layer2.1.conv2": [128, 128, 3, 3],
-  "layer3.0.conv1": [256, 128, 3, 3],
-  "layer3.0.conv2": [256, 256, 3, 3],
-  "layer3.0.downsample.0": [256, 128, 1, 1],
-  "layer3.1.conv1": [256, 256, 3, 3],
-  "layer3.1.conv2": [256, 256, 3, 3],
-  "layer4.0.conv1": [512, 256, 3, 3],
-  "layer4.0.conv2": [512, 512, 3, 3],
-  "layer4.0.downsample.0": [512, 256, 1, 1],
-  "layer4.1.conv1": [512, 512, 3, 3],
-  "layer4.1.conv2": [512, 512, 3, 3],
-  "fc": [100, 512], # 100 for cifar-100
+    # out, in , kernel_size
+    "layer1.0.conv1": [64, 64, 3, 3],
+    "layer1.0.conv2": [64, 64, 3, 3],
+    "layer1.1.conv1": [64, 64, 3, 3],
+    "layer1.1.conv2": [64, 64, 3, 3],
+    "layer2.0.conv1": [128, 64, 3, 3],
+    "layer2.0.conv2": [128, 128, 3, 3],
+    "layer2.0.downsample.0": [128, 64, 1, 1],
+    "layer2.1.conv1": [128, 128, 3, 3],
+    "layer2.1.conv2": [128, 128, 3, 3],
+    "layer3.0.conv1": [256, 128, 3, 3],
+    "layer3.0.conv2": [256, 256, 3, 3],
+    "layer3.0.downsample.0": [256, 128, 1, 1],
+    "layer3.1.conv1": [256, 256, 3, 3],
+    "layer3.1.conv2": [256, 256, 3, 3],
+    "layer4.0.conv1": [512, 256, 3, 3],
+    "layer4.0.conv2": [512, 512, 3, 3],
+    "layer4.0.downsample.0": [512, 256, 1, 1],
+    "layer4.1.conv1": [512, 512, 3, 3],
+    "layer4.1.conv2": [512, 512, 3, 3],
+    "fc": [100, 512],  # 100 for cifar-100
 }
+
+
+def resnet18_layer_info_plot() -> None:
+    all_data = []
+    # pylint: disable=consider-using-dict-items
+    for layer in layer_info_resnet_18_layers.keys():
+        values = layer_info_resnet_18_layers[layer]
+        kernel = "-"
+        in_ = "-"
+        out_ = "-"
+        if len(values) > 2:
+            type_ = "Conv2d"
+            D = values[2] * values[3] * values[1]
+            M = values[0]
+            kernel = f"[{values[2]}, {values[3]}]"
+            in_ = values[1]
+            out_ = values[0]
+        else:
+            type_ = "Linear"
+            D = values[1]
+            M = values[0]
+
+        c_width = D / 64
+        row = {
+            "name": layer,
+            "type": type_,
+            "D": D,
+            # "M": M,
+            "in": in_,
+            "out": out_,
+            "kernel": kernel,
+            "c_width": c_width,
+        }
+        all_data.append(row)
+
+    print(all_data)
+    df = pd.DataFrame(all_data)
+    print(df)
+    cidx = pd.Index(
+        ["Layer Name", "Type", "D", "In", "Out", "Kernel", "Codebook width"]
+    )
+    df.columns = cidx
+    styler = df.style
+    styler.format(subset="Codebook width", precision=0).format_index(
+        escape="latex", axis=1
+    ).format_index(escape="latex", axis=0).hide(level=0, axis=0)
+    styler.to_latex(
+        f"table_resnet18.tex",
+        clines="skip-last;data",
+        convert_css=True,
+        position_float="centering",
+        multicol_align="|c|",
+        hrules=True,
+        # float_format="%.2f",
+    )
+
 
 def calculate_MACs(layer_name: str, df: pd.DataFrame) -> int:
     N = df[layer_name + ".learned_n"] / df[layer_name + ".rows"]
@@ -411,6 +467,7 @@ def calculate_MACs(layer_name: str, df: pd.DataFrame) -> int:
     M = df[layer_name + ".learned_m"]
 
     return N * D * M
+
 
 def calculate_MACs_resnet(layer_name: str, df: pd.DataFrame, N: int = 256) -> int:
     layer_info = layer_info_resnet_18_layers[layer_name]
@@ -498,7 +555,9 @@ def json_to_multi_layer(path: str, max_C: int = 128, prefix: str = "") -> pd.Dat
                         layer_name + ".learned_b_shape",
                     ]
                 )
-            macs_layer = calculate_MACs_resnet(layer_name, data, N=256) # n is not correct but would need more infos
+            macs_layer = calculate_MACs_resnet(
+                layer_name, data, N=256
+            )  # n is not correct but would need more infos
             saved_macs += macs_layer
             data[layer_name + ".macs"] = macs_layer
         data["num_replaced_layers"] = len(list(layers.keys()))
@@ -747,11 +806,11 @@ def plot_comparision() -> None:
 
 
 def plot_retraining() -> None:
-    data_path_1 = "../data/resnet18-cifar100_real"
+    data_path_1 = "../data/resnet18-cifar10"
     df = json_to_multi_layer(data_path_1, 64)
     print(df)
     sns.set_context("paper")
-    sns.set(font="serif")
+    sns.set(font="serif", font_scale=2)
     sns.set_style(
         "whitegrid",
         # {"font.family": "serif", "font.serif": ["Times", "Palatino", "serif"]},
@@ -762,23 +821,24 @@ def plot_retraining() -> None:
         data=df[df["hue_string"] == "retrained"],
         x="last_replaced",
         y="top_1_accuracy_100",
-        color="lightgreen"
+        color="green",
     )
     plot2 = sns.barplot(
         data=df[df["hue_string"] == "replaced"],
         x="last_replaced",
         y="top_1_accuracy_100",
-        color="lightblue"
+        color="blue",
     )
-    RESNET_ACC = 68.250
+    RESNET_ACC = 87.130  # 87.130, 68.250
     # Draw a horizontal line to show the starting point
     plt.hlines(y=RESNET_ACC, linestyle=":", color="red", xmin=0.0, xmax=19)
     plt.xticks(rotation=90)
     plot2.set_ylabel("Top1 Accuracy [%]")
     plot2.set_xlabel("Replaced Layers")
-    plot2.set_title("ResNet18 CIFAR-100 Replace&Freeze Retraining")
-    plt.savefig("../figures/retrained.pdf", bbox_inches="tight", dpi=600)
-    plt.savefig("../figures/retrained.png", bbox_inches="tight", dpi=600)
+    plot2.set_title("ResNet18 CIFAR-10 Replace&Freeze Retraining C=64")
+    plt.savefig("../figures/retrained_10.pdf", bbox_inches="tight", dpi=600)
+    plt.savefig("../figures/retrained_10.png", bbox_inches="tight", dpi=600)
+
 
 def plot_multi_layer() -> None:
     data_path_1 = "../data/resnet18-cifar100_real"
@@ -1211,4 +1271,5 @@ if __name__ == "__main__":
     # plot_multi_layer()
     # data_to_sql()
     # create_tables()
-    plot_retraining()
+    # plot_retraining()
+    resnet18_layer_info_plot()
