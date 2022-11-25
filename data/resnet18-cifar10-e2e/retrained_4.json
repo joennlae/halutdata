@@ -1,0 +1,97 @@
+{
+    "halut_layers": "{\"layer1.1.conv2\": [64, -1, 16, 0], \"layer1.1.conv1\": [64, -1, 16, 0], \"layer1.0.conv2\": [64, -1, 16, 0], \"layer1.0.conv1\": [64, -1, 16, 0]}",
+    "layer1.0.conv1.C": 64,
+    "layer1.0.conv1.H_size": 11264,
+    "layer1.0.conv1.K": 16,
+    "layer1.0.conv1.L_size": 262144,
+    "layer1.0.conv1.encoding_algorithm": 0,
+    "layer1.0.conv1.learned_a_shape": [
+        1,
+        261970
+    ],
+    "layer1.0.conv1.learned_b_shape": [
+        261970,
+        64
+    ],
+    "layer1.0.conv1.learned_d": 261970,
+    "layer1.0.conv1.learned_m": 64,
+    "layer1.0.conv1.learned_n": 1,
+    "layer1.0.conv1.mae": 0.212224405503273,
+    "layer1.0.conv1.mape": 0.1067481704056263,
+    "layer1.0.conv1.mse": 0.12263166703383128,
+    "layer1.0.conv1.rows": -1,
+    "layer1.0.conv1.scaled_error": 0.013791252191364765,
+    "layer1.0.conv1.scaled_shift": 0.0003383485131353761,
+    "layer1.0.conv1.stored_array_size": 32,
+    "layer1.0.conv2.C": 64,
+    "layer1.0.conv2.H_size": 11264,
+    "layer1.0.conv2.K": 16,
+    "layer1.0.conv2.L_size": 262144,
+    "layer1.0.conv2.encoding_algorithm": 0,
+    "layer1.0.conv2.learned_a_shape": [
+        1,
+        261970
+    ],
+    "layer1.0.conv2.learned_b_shape": [
+        261970,
+        64
+    ],
+    "layer1.0.conv2.learned_d": 261970,
+    "layer1.0.conv2.learned_m": 64,
+    "layer1.0.conv2.learned_n": 1,
+    "layer1.0.conv2.mae": 0.20383908055623373,
+    "layer1.0.conv2.mape": 0.11907783410946528,
+    "layer1.0.conv2.mse": 0.08538445369402567,
+    "layer1.0.conv2.rows": -1,
+    "layer1.0.conv2.scaled_error": 0.021870501152674356,
+    "layer1.0.conv2.scaled_shift": -0.00023136688156664604,
+    "layer1.0.conv2.stored_array_size": 32,
+    "layer1.1.conv1.C": 64,
+    "layer1.1.conv1.H_size": 11264,
+    "layer1.1.conv1.K": 16,
+    "layer1.1.conv1.L_size": 262144,
+    "layer1.1.conv1.encoding_algorithm": 0,
+    "layer1.1.conv1.learned_a_shape": [
+        1,
+        261970
+    ],
+    "layer1.1.conv1.learned_b_shape": [
+        261970,
+        64
+    ],
+    "layer1.1.conv1.learned_d": 261970,
+    "layer1.1.conv1.learned_m": 64,
+    "layer1.1.conv1.learned_n": 1,
+    "layer1.1.conv1.mae": 0.26626395308176676,
+    "layer1.1.conv1.mape": 0.12072618696292241,
+    "layer1.1.conv1.mse": 0.14272839634418488,
+    "layer1.1.conv1.rows": -1,
+    "layer1.1.conv1.scaled_error": 0.02187375991791487,
+    "layer1.1.conv1.scaled_shift": 9.208523468162942e-05,
+    "layer1.1.conv1.stored_array_size": 32,
+    "layer1.1.conv2.C": 64,
+    "layer1.1.conv2.H_size": 11264,
+    "layer1.1.conv2.K": 16,
+    "layer1.1.conv2.L_size": 262144,
+    "layer1.1.conv2.encoding_algorithm": 0,
+    "layer1.1.conv2.learned_a_shape": [
+        1,
+        261970
+    ],
+    "layer1.1.conv2.learned_b_shape": [
+        261970,
+        64
+    ],
+    "layer1.1.conv2.learned_d": 261970,
+    "layer1.1.conv2.learned_m": 64,
+    "layer1.1.conv2.learned_n": 1,
+    "layer1.1.conv2.mae": 0.09957489932775497,
+    "layer1.1.conv2.mape": 0.07234136203527451,
+    "layer1.1.conv2.mse": 0.018274305841326714,
+    "layer1.1.conv2.rows": -1,
+    "layer1.1.conv2.scaled_error": 0.030155703163146974,
+    "layer1.1.conv2.scaled_shift": 0.0007799553068354725,
+    "layer1.1.conv2.stored_array_size": 32,
+    "top_1_accuracy": 90.86,
+    "top_5_accuracy": 99.73
+}

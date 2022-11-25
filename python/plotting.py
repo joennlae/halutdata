@@ -419,8 +419,8 @@ def resnet18_layer_info_plot() -> None:
             D = values[2] * values[3] * values[1]
             M = values[0]
             kernel = f"[{values[2]}, {values[3]}]"
-            in_ = values[1]
-            out_ = values[0]
+            in_ = values[1]  # type: ignore[assignment]
+            out_ = values[0]  # type: ignore[assignment]
         else:
             type_ = "Linear"
             D = values[1]
