@@ -806,7 +806,7 @@ def plot_comparision() -> None:
 
 
 def plot_retraining() -> None:
-    data_path_1 = "../data/resnet18-cifar10"
+    data_path_1 = "../data/resnet18-cifar10-reformulated-e2e-true"
     df = json_to_multi_layer(data_path_1, 64)
     print(df)
     sns.set_context("paper")
@@ -829,15 +829,15 @@ def plot_retraining() -> None:
         y="top_1_accuracy_100",
         color="blue",
     )
-    RESNET_ACC = 87.130  # 87.130, 68.250
+    RESNET_ACC = 90.9  # 87.130, 68.250
     # Draw a horizontal line to show the starting point
     plt.hlines(y=RESNET_ACC, linestyle=":", color="red", xmin=0.0, xmax=19)
     plt.xticks(rotation=90)
     plot2.set_ylabel("Top1 Accuracy [%]")
     plot2.set_xlabel("Replaced Layers")
-    plot2.set_title("ResNet18 CIFAR-10 Replace&Freeze Retraining C=64")
-    plt.savefig("../figures/retrained_10.pdf", bbox_inches="tight", dpi=600)
-    plt.savefig("../figures/retrained_10.png", bbox_inches="tight", dpi=600)
+    plot2.set_title("ResNet18 CIFAR-10 E2E Retraining C=64")
+    plt.savefig("../figures/retrained_e2e_10.pdf", bbox_inches="tight", dpi=600)
+    plt.savefig("../figures/retrained_e2e_10.png", bbox_inches="tight", dpi=600)
 
 
 def plot_multi_layer() -> None:
@@ -1271,5 +1271,5 @@ if __name__ == "__main__":
     # plot_multi_layer()
     # data_to_sql()
     # create_tables()
-    # plot_retraining()
-    resnet18_layer_info_plot()
+    plot_retraining()
+    # resnet18_layer_info_plot()
