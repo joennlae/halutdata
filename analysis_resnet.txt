@@ -1,0 +1,157 @@
+Loading data
+Loading training data
+Files already downloaded and verified
+Took 1.0200386047363281
+Loading validation data
+Files already downloaded and verified
+Creating data loaders
+layer1.0.conv1.lut torch.Size([64, 64, 16])
+layer1.0.conv1.lut 1024.0
+layer1.0.conv1.thresholds torch.Size([960])
+layer1.0.conv2.lut torch.Size([64, 64, 16])
+layer1.0.conv2.lut 1024.0
+layer1.0.conv2.thresholds torch.Size([960])
+layer1.1.conv1.lut torch.Size([64, 64, 16])
+layer1.1.conv1.lut 1024.0
+layer1.1.conv1.thresholds torch.Size([960])
+layer1.1.conv2.lut torch.Size([64, 64, 16])
+layer1.1.conv2.lut 1024.0
+layer1.1.conv2.thresholds torch.Size([960])
+layer2.0.conv1.lut torch.Size([128, 64, 16])
+layer2.0.conv1.lut 2048.0
+layer2.0.conv1.thresholds torch.Size([960])
+layer2.0.conv2.lut torch.Size([128, 64, 16])
+layer2.0.conv2.lut 2048.0
+layer2.0.conv2.thresholds torch.Size([960])
+layer2.0.downsample.0.lut torch.Size([128, 64, 16])
+layer2.0.downsample.0.lut 2048.0
+layer2.0.downsample.0.thresholds torch.Size([960])
+layer2.1.conv1.lut torch.Size([128, 64, 16])
+layer2.1.conv1.lut 2048.0
+layer2.1.conv1.thresholds torch.Size([960])
+layer2.1.conv2.lut torch.Size([128, 64, 16])
+layer2.1.conv2.lut 2048.0
+layer2.1.conv2.thresholds torch.Size([960])
+layer3.0.conv1.lut torch.Size([256, 64, 16])
+layer3.0.conv1.lut 4096.0
+layer3.0.conv1.thresholds torch.Size([960])
+layer3.0.conv2.lut torch.Size([256, 64, 16])
+layer3.0.conv2.lut 4096.0
+layer3.0.conv2.thresholds torch.Size([960])
+layer3.0.downsample.0.lut torch.Size([256, 64, 16])
+layer3.0.downsample.0.lut 4096.0
+layer3.0.downsample.0.thresholds torch.Size([960])
+layer3.1.conv1.lut torch.Size([256, 64, 16])
+layer3.1.conv1.lut 4096.0
+layer3.1.conv1.thresholds torch.Size([960])
+layer3.1.conv2.lut torch.Size([256, 64, 16])
+layer3.1.conv2.lut 4096.0
+layer3.1.conv2.thresholds torch.Size([960])
+layer4.0.conv1.lut torch.Size([512, 64, 16])
+layer4.0.conv1.lut 8192.0
+layer4.0.conv1.thresholds torch.Size([960])
+layer4.0.conv2.lut torch.Size([512, 64, 16])
+layer4.0.conv2.lut 8192.0
+layer4.0.conv2.thresholds torch.Size([960])
+layer4.0.downsample.0.lut torch.Size([512, 64, 16])
+layer4.0.downsample.0.lut 8192.0
+layer4.0.downsample.0.thresholds torch.Size([960])
+layer4.1.conv1.lut torch.Size([512, 64, 16])
+layer4.1.conv1.lut 8192.0
+layer4.1.conv1.thresholds torch.Size([960])
+layer4.1.conv2.lut torch.Size([512, 64, 16])
+layer4.1.conv2.lut 8192.0
+layer4.1.conv2.thresholds torch.Size([960])
+fc.lut torch.Size([1])
+fc.thresholds torch.Size([1])
+total params 4867906
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+ResNet                                   [1, 10]                   --
+├─Conv2d: 1-1                            [1, 64, 32, 32]           1,728
+├─BatchNorm2d: 1-2                       [1, 64, 32, 32]           128
+├─ReLU: 1-3                              [1, 64, 32, 32]           --
+├─Identity: 1-4                          [1, 64, 32, 32]           --
+├─Sequential: 1-5                        [1, 64, 32, 32]           --
+│    └─BasicBlock: 2-1                   [1, 64, 32, 32]           --
+│    │    └─HalutConv2d: 3-1             [1, 64, 32, 32]           1,335,241
+│    │    └─BatchNorm2d: 3-2             [1, 64, 32, 32]           128
+│    │    └─ReLU: 3-3                    [1, 64, 32, 32]           --
+│    │    └─HalutConv2d: 3-4             [1, 64, 32, 32]           1,335,241
+│    │    └─BatchNorm2d: 3-5             [1, 64, 32, 32]           128
+│    │    └─ReLU: 3-6                    [1, 64, 32, 32]           --
+│    └─BasicBlock: 2-2                   [1, 64, 32, 32]           --
+│    │    └─HalutConv2d: 3-7             [1, 64, 32, 32]           1,335,241
+│    │    └─BatchNorm2d: 3-8             [1, 64, 32, 32]           128
+│    │    └─ReLU: 3-9                    [1, 64, 32, 32]           --
+│    │    └─HalutConv2d: 3-10            [1, 64, 32, 32]           1,335,241
+│    │    └─BatchNorm2d: 3-11            [1, 64, 32, 32]           128
+│    │    └─ReLU: 3-12                   [1, 64, 32, 32]           --
+├─Sequential: 1-6                        [1, 128, 16, 16]          --
+│    └─BasicBlock: 2-3                   [1, 128, 16, 16]          --
+│    │    └─HalutConv2d: 3-13            [1, 128, 16, 16]          1,437,641
+│    │    └─BatchNorm2d: 3-14            [1, 128, 16, 16]          256
+│    │    └─ReLU: 3-15                   [1, 128, 16, 16]          --
+│    │    └─HalutConv2d: 3-16            [1, 128, 16, 16]          1,511,369
+│    │    └─BatchNorm2d: 3-17            [1, 128, 16, 16]          256
+│    │    └─Sequential: 3-18             [1, 128, 16, 16]          --
+│    │    │    └─HalutConv2d: 4-1        [1, 128, 16, 16]          1,372,105
+│    │    │    └─BatchNorm2d: 4-2        [1, 128, 16, 16]          256
+│    │    └─ReLU: 3-19                   [1, 128, 16, 16]          --
+│    └─BasicBlock: 2-4                   [1, 128, 16, 16]          --
+│    │    └─HalutConv2d: 3-20            [1, 128, 16, 16]          1,511,369
+│    │    └─BatchNorm2d: 3-21            [1, 128, 16, 16]          256
+│    │    └─ReLU: 3-22                   [1, 128, 16, 16]          --
+│    │    └─HalutConv2d: 3-23            [1, 128, 16, 16]          1,511,369
+│    │    └─BatchNorm2d: 3-24            [1, 128, 16, 16]          256
+│    │    └─ReLU: 3-25                   [1, 128, 16, 16]          --
+├─Sequential: 1-7                        [1, 256, 8, 8]            --
+│    └─BasicBlock: 2-5                   [1, 256, 8, 8]            --
+│    │    └─HalutConv2d: 3-26            [1, 256, 8, 8]            1,789,897
+│    │    └─BatchNorm2d: 3-27            [1, 256, 8, 8]            512
+│    │    └─ReLU: 3-28                   [1, 256, 8, 8]            --
+│    │    └─HalutConv2d: 3-29            [1, 256, 8, 8]            2,084,809
+│    │    └─BatchNorm2d: 3-30            [1, 256, 8, 8]            512
+│    │    └─Sequential: 3-31             [1, 256, 8, 8]            --
+│    │    │    └─HalutConv2d: 4-3        [1, 256, 8, 8]            1,527,753
+│    │    │    └─BatchNorm2d: 4-4        [1, 256, 8, 8]            512
+│    │    └─ReLU: 3-32                   [1, 256, 8, 8]            --
+│    └─BasicBlock: 2-6                   [1, 256, 8, 8]            --
+│    │    └─HalutConv2d: 3-33            [1, 256, 8, 8]            2,084,809
+│    │    └─BatchNorm2d: 3-34            [1, 256, 8, 8]            512
+│    │    └─ReLU: 3-35                   [1, 256, 8, 8]            --
+│    │    └─HalutConv2d: 3-36            [1, 256, 8, 8]            2,084,809
+│    │    └─BatchNorm2d: 3-37            [1, 256, 8, 8]            512
+│    │    └─ReLU: 3-38                   [1, 256, 8, 8]            --
+├─Sequential: 1-8                        [1, 512, 4, 4]            --
+│    └─BasicBlock: 2-7                   [1, 512, 4, 4]            --
+│    │    └─HalutConv2d: 3-39            [1, 512, 4, 4]            2,936,777
+│    │    └─BatchNorm2d: 3-40            [1, 512, 4, 4]            1,024
+│    │    └─ReLU: 3-41                   [1, 512, 4, 4]            --
+│    │    └─HalutConv2d: 3-42            [1, 512, 4, 4]            4,116,425
+│    │    └─BatchNorm2d: 3-43            [1, 512, 4, 4]            1,024
+│    │    └─Sequential: 3-44             [1, 512, 4, 4]            --
+│    │    │    └─HalutConv2d: 4-5        [1, 512, 4, 4]            1,888,201
+│    │    │    └─BatchNorm2d: 4-6        [1, 512, 4, 4]            1,024
+│    │    └─ReLU: 3-45                   [1, 512, 4, 4]            --
+│    └─BasicBlock: 2-8                   [1, 512, 4, 4]            --
+│    │    └─HalutConv2d: 3-46            [1, 512, 4, 4]            4,116,425
+│    │    └─BatchNorm2d: 3-47            [1, 512, 4, 4]            1,024
+│    │    └─ReLU: 3-48                   [1, 512, 4, 4]            --
+│    │    └─HalutConv2d: 3-49            [1, 512, 4, 4]            4,116,425
+│    │    └─BatchNorm2d: 3-50            [1, 512, 4, 4]            1,024
+│    │    └─ReLU: 3-51                   [1, 512, 4, 4]            --
+├─AdaptiveAvgPool2d: 1-9                 [1, 512, 1, 1]            --
+├─HalutLinear: 1-10                      [1, 10]                   5,145
+==========================================================================================
+Total params: 39,447,620
+Trainable params: 16,041,866
+Non-trainable params: 23,405,754
+Total mult-adds (M): 555.43
+==========================================================================================
+Input size (MB): 0.01
+Forward/backward pass size (MB): 9.83
+Params size (MB): 157.81
+Estimated Total Size (MB): 167.65
+==========================================================================================

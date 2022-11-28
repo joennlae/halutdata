@@ -413,7 +413,7 @@ def resnet18_layer_info_plot() -> None:
         values = layer_info_resnet_18_layers[layer]
         kernel = "-"
         in_ = "-"
-        out_ = "-"
+        out_ = 0 
         if len(values) > 2:
             type_ = "Conv2d"
             D = values[2] * values[3] * values[1]
@@ -436,6 +436,7 @@ def resnet18_layer_info_plot() -> None:
             "out": out_,
             "kernel": kernel,
             "c_width": c_width,
+            "lut_size": 64 * int(out_) * 16 * 2 // 1024,
         }
         all_data.append(row)
 
@@ -443,11 +444,11 @@ def resnet18_layer_info_plot() -> None:
     df = pd.DataFrame(all_data)
     print(df)
     cidx = pd.Index(
-        ["Layer Name", "Type", "D", "In", "Out", "Kernel", "Codebook width"]
+        ["Layer Name", "Type", "D", "In", "Out", "Kernel", "CW", "LUT [kB]"]
     )
     df.columns = cidx
     styler = df.style
-    styler.format(subset="Codebook width", precision=0).format_index(
+    styler.format(subset="CW", precision=0).format_index(
         escape="latex", axis=1
     ).format_index(escape="latex", axis=0).hide(level=0, axis=0)
     styler.to_latex(
@@ -1271,5 +1272,5 @@ if __name__ == "__main__":
     # plot_multi_layer()
     # data_to_sql()
     # create_tables()
-    plot_retraining()
-    # resnet18_layer_info_plot()
+    # plot_retraining()
+    resnet18_layer_info_plot()
