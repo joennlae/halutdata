@@ -413,7 +413,7 @@ def resnet18_layer_info_plot() -> None:
         values = layer_info_resnet_18_layers[layer]
         kernel = "-"
         in_ = "-"
-        out_ = 0 
+        out_ = 0
         if len(values) > 2:
             type_ = "Conv2d"
             D = values[2] * values[3] * values[1]
@@ -535,7 +535,7 @@ def json_to_dataframe_macs(path: str, max_C: int = 16) -> pd.DataFrame:
     return df
 
 
-def json_to_multi_layer(path: str, max_C: int = 128, prefix: str = "") -> pd.DataFrame:
+def json_to_multi_layer(path: str, max_C: int = 1024, prefix: str = "") -> pd.DataFrame:
     files = glob.glob(path + "/*.json")
 
     dfs = []  # an empty list to store the data frames
@@ -807,8 +807,8 @@ def plot_comparision() -> None:
 
 
 def plot_retraining() -> None:
-    data_path_1 = "../data/resnet18-cifar10-reformulated-e2e-true"
-    df = json_to_multi_layer(data_path_1, 64)
+    data_path_1 = "../data/resnet18-cifar10-same-compression-cw18-b64"
+    df = json_to_multi_layer(data_path_1, 1024)
     print(df)
     sns.set_context("paper")
     sns.set(font="serif", font_scale=2)
@@ -836,9 +836,9 @@ def plot_retraining() -> None:
     plt.xticks(rotation=90)
     plot2.set_ylabel("Top1 Accuracy [%]")
     plot2.set_xlabel("Replaced Layers")
-    plot2.set_title("ResNet18 CIFAR-10 E2E Retraining C=64")
-    plt.savefig("../figures/retrained_e2e_10.pdf", bbox_inches="tight", dpi=600)
-    plt.savefig("../figures/retrained_e2e_10.png", bbox_inches="tight", dpi=600)
+    plot2.set_title("ResNet18 CIFAR-10 E2E Retraining CW=18")
+    plt.savefig("../figures/retrained_cw18_10.pdf", bbox_inches="tight", dpi=600)
+    plt.savefig("../figures/retrained_cw18_10.png", bbox_inches="tight", dpi=600)
 
 
 def plot_multi_layer() -> None:
@@ -1272,5 +1272,5 @@ if __name__ == "__main__":
     # plot_multi_layer()
     # data_to_sql()
     # create_tables()
-    # plot_retraining()
-    resnet18_layer_info_plot()
+    plot_retraining()
+    # resnet18_layer_info_plot()
