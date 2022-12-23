@@ -1,12 +1,13 @@
-import json
-from math import ceil, sqrt
-import re
-from typing import Any, Literal
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import glob
+import json
+import re
+from math import ceil, sqrt
+from typing import Any, Literal
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
 all_layers = [
     "layer1.0.conv1",
@@ -537,15 +538,30 @@ def json_to_dataframe_macs(path: str, max_C: int = 16) -> pd.DataFrame:
 
 def json_to_multi_layer(path: str, max_C: int = 1024, prefix: str = "") -> pd.DataFrame:
     files = glob.glob(path + "/*.json")
+    files.sort()
 
     dfs = []  # an empty list to store the data frames
     for file in files:
-        data = pd.read_json(file)  # read data frame from json file
-        data = data.drop([1])
-        layers = json.loads(data.iloc[0]["halut_layers"])
-        C = data.iloc[0][list(layers.keys())[0] + ".C"]
+        print(file)
+        data = None
+        try:
+            data = pd.read_json(file)
+            data = data.drop([1])
+            layers = json.loads(data.iloc[0]["halut_layers"])
+            C = data.iloc[0][list(layers.keys())[0] + ".C"]
+        except ValueError:
+            pass
+        if data is None:
+            data = pd.read_json(file, typ="series")
+            data = data.to_frame("test").T.reset_index()
+            print(data)
+            layers = json.loads(data.iloc[0]["halut_layers"])
+            C = 24  # random
         if C > max_C:
             continue
+
+        print(data)
+
         saved_macs = 0
         print(data)
         for layer_name in layers.keys():
@@ -807,7 +823,7 @@ def plot_comparision() -> None:
 
 
 def plot_retraining() -> None:
-    data_path_1 = "../data/resnet18-cifar10-same-compression-cw18-b64"
+    data_path_1 = "../data/resnet18-imagenet-cw9-bs8-sf4-opt-temp"
     df = json_to_multi_layer(data_path_1, 1024)
     print(df)
     sns.set_context("paper")
@@ -815,6 +831,47 @@ def plot_retraining() -> None:
     sns.set_style(
         "whitegrid",
         # {"font.family": "serif", "font.serif": ["Times", "Palatino", "serif"]},
+    )
+
+    df["red_bar"] = 0
+    df["blue_bar"] = 0
+    df["blue_bar"][df["hue_string"] == "retrained"] = df["top_1_accuracy_100"][
+        df["hue_string"] == "replaced"
+    ].values
+    df["diff"] = 0
+    vals = df[df["hue_string"] == "retrained"]["top_1_accuracy_100"].values
+    vals2 = df[df["hue_string"] == "replaced"]["top_1_accuracy_100"].values
+    df["diff"][df["hue_string"] == "retrained"] = vals - vals2
+    print(
+        df[
+            [
+                "last_replaced",
+                "diff",
+                "top_1_accuracy_100",
+                "red_bar",
+                "blue_bar",
+                "hue_string",
+            ]
+        ]
+    )
+    df["red_bar"][df["diff"] < 0] = df["top_1_accuracy_100"][(df["diff"] < 0)].values
+
+    vals = df["blue_bar"][(df["hue_string"] == "retrained") & (df["diff"] < 0)].values
+    vals2 = df["diff"][(df["hue_string"] == "retrained") & (df["diff"] < 0)].values
+    print(vals, vals2, vals + vals2)
+    df["blue_bar"][(df["hue_string"] == "retrained") & (df["diff"] < 0)] = vals + vals2
+    df["red_bar"][(df["hue_string"] == "retrained") & (df["diff"] < 0)] = vals
+    print(
+        df[
+            [
+                "last_replaced",
+                "diff",
+                "top_1_accuracy_100",
+                "red_bar",
+                "blue_bar",
+                "hue_string",
+            ]
+        ]
     )
     plt.figure(figsize=(14, 8))
     print(df["last_replaced"])
@@ -824,21 +881,34 @@ def plot_retraining() -> None:
         y="top_1_accuracy_100",
         color="green",
     )
-    plot2 = sns.barplot(
-        data=df[df["hue_string"] == "replaced"],
+    plot3 = sns.barplot(
+        data=df[df["hue_string"] == "retrained"],
         x="last_replaced",
-        y="top_1_accuracy_100",
+        y="red_bar",
+        color="red",
+    )
+
+    plot2 = sns.barplot(
+        data=df[df["hue_string"] == "retrained"],
+        x="last_replaced",
+        y="blue_bar",
         color="blue",
     )
-    RESNET_ACC = 90.9  # 87.130, 68.250
+
+    # plot.set_ylim(82, 92)
+    RESNET_ACC = 69.758  # 87.130, 68.250, 69.758
     # Draw a horizontal line to show the starting point
     plt.hlines(y=RESNET_ACC, linestyle=":", color="red", xmin=0.0, xmax=19)
     plt.xticks(rotation=90)
     plot2.set_ylabel("Top1 Accuracy [%]")
     plot2.set_xlabel("Replaced Layers")
-    plot2.set_title("ResNet18 CIFAR-10 E2E Retraining CW=18")
-    plt.savefig("../figures/retrained_cw18_10.pdf", bbox_inches="tight", dpi=600)
-    plt.savefig("../figures/retrained_cw18_10.png", bbox_inches="tight", dpi=600)
+    plot2.set_title("ResNet18 ImageNet E2E Retraining CW=9")
+    plt.savefig(
+        "../figures/retrained_cw9_imagenet_opt.pdf", bbox_inches="tight", dpi=600
+    )
+    plt.savefig(
+        "../figures/retrained_cw9_imagenet_opt.png", bbox_inches="tight", dpi=600
+    )
 
 
 def plot_multi_layer() -> None:
