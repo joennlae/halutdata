@@ -823,7 +823,7 @@ def plot_comparision() -> None:
 
 
 def plot_retraining() -> None:
-    data_path_1 = "../data/resnet18-imagenet-cw9-bs8-sf4-opt-temp"
+    data_path_1 = "../data/resnet18-imagenet-cw9-bs8-sf4-opt"
     df = json_to_multi_layer(data_path_1, 1024)
     print(df)
     sns.set_context("paper")
