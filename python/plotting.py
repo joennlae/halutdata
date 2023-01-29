@@ -1336,11 +1336,48 @@ def data_to_sql() -> None:
     con.close()
 
 
+def plot_ops_per_watt():
+    plt.style.use("seaborn-v0_8-poster")
+    data = {
+        "C": [16, 32, 64, 128, 256, 512],
+        "GF22FDX": [14.8, 10.4, 6.8, 3.8, 2.0, 1.0],
+        "7nm (scaled)": [39.6, 28.0, 18.0, 9.6, 4.8, 2.4],
+    }
+    df = pd.DataFrame(data)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 7))
+    ax.grid(True)
+    ax.plot(
+        [3, 4, 5, 6],
+        df["GF22FDX"][2:],
+        linestyle="--",
+        color="C0",
+    )
+    ax.plot(
+        [3, 4, 5, 6],
+        df["7nm (scaled)"][2:],
+        linestyle="--",
+        color="C1",
+    )
+    ax.plot([1, 2, 3], df["GF22FDX"][0:3], label="GF22FDX", marker="o", color="C0")
+    ax.plot(
+        [1, 2, 3], df["7nm (scaled)"][0:3], label="7nm (scaled)", marker="o", color="C1"
+    )
+    ax.set_xlabel("C")
+    ax.set_ylabel("TOPs/W")
+    ax.set_xticks([1, 2, 3, 4, 5, 6])
+    ax.set_xticklabels(df["C"])
+    ax.set_ylim(0, 45)
+    ax.legend()
+    ax.set_title("TOPs/W for different C with CW=8")
+    plt.savefig("ops_per_watt.png")
+
+
 if __name__ == "__main__":
     # plot_all_layers()
     # plot_comparision()
     # plot_multi_layer()
     # data_to_sql()
     # create_tables()
-    plot_retraining()
+    # plot_retraining()
     # resnet18_layer_info_plot()
+    plot_ops_per_watt()
