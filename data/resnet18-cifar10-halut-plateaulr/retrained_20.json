@@ -1,0 +1,22 @@
+{
+    "fc.C": 256,
+    "fc.H_size": 45056,
+    "fc.K": 16,
+    "fc.L_size": 163840,
+    "fc.learned_a_shape": [
+        1,
+        512
+    ],
+    "fc.learned_b_shape": [
+        512,
+        10
+    ],
+    "fc.learned_d": 512,
+    "fc.learned_m": 10,
+    "fc.learned_n": 1,
+    "fc.rows": -1,
+    "fc.stored_array_size": 48,
+    "halut_layers": "{\"fc\": [256, -1, 16], \"layer4.1.conv2\": [512, -1, 16], \"layer4.1.conv1\": [512, -1, 16], \"layer4.0.downsample.0\": [64, -1, 16], \"layer4.0.conv2\": [512, -1, 16], \"layer4.0.conv1\": [256, -1, 16], \"layer3.1.conv2\": [256, -1, 16], \"layer3.1.conv1\": [256, -1, 16], \"layer3.0.downsample.0\": [32, -1, 16], \"layer3.0.conv2\": [256, -1, 16], \"layer3.0.conv1\": [128, -1, 16], \"layer2.1.conv2\": [128, -1, 16], \"layer2.1.conv1\": [128, -1, 16], \"layer2.0.downsample.0\": [16, -1, 16], \"layer2.0.conv2\": [128, -1, 16], \"layer2.0.conv1\": [64, -1, 16], \"layer1.1.conv2\": [64, -1, 16], \"layer1.1.conv1\": [64, -1, 16], \"layer1.0.conv2\": [64, -1, 16], \"layer1.0.conv1\": [64, -1, 16]}",
+    "top_1_accuracy": 84.08,
+    "top_5_accuracy": 99.08
+}
