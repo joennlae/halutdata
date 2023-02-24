@@ -1,0 +1,22 @@
+{
+    "halut_layers": "{\"layer3.1.conv1\": [32, -1, 16, \"kn2col\"], \"layer3.0.downsample.0\": [32, -1, 16, \"im2col\"], \"layer3.0.conv2\": [32, -1, 16, \"kn2col\"], \"layer3.0.conv1\": [16, -1, 16, \"kn2col\"], \"layer2.1.conv2\": [128, -1, 16, \"im2col\"], \"layer2.1.conv1\": [128, -1, 16, \"im2col\"], \"layer2.0.downsample.0\": [16, -1, 16, \"im2col\"], \"layer2.0.conv2\": [128, -1, 16, \"im2col\"], \"layer2.0.conv1\": [64, -1, 16, \"im2col\"], \"layer1.1.conv2\": [64, -1, 16, \"im2col\"], \"layer1.1.conv1\": [64, -1, 16, \"im2col\"], \"layer1.0.conv2\": [64, -1, 16, \"im2col\"], \"layer1.0.conv1\": [64, -1, 16, \"im2col\"]}",
+    "layer3.1.conv1.C": 32,
+    "layer3.1.conv1.H_size": 5632,
+    "layer3.1.conv1.K": 16,
+    "layer3.1.conv1.L_size": 4718592,
+    "layer3.1.conv1.learned_a_shape": [
+        1,
+        8
+    ],
+    "layer3.1.conv1.learned_b_shape": [
+        8,
+        9
+    ],
+    "layer3.1.conv1.learned_d": 8,
+    "layer3.1.conv1.learned_m": 9,
+    "layer3.1.conv1.learned_n": 1,
+    "layer3.1.conv1.rows": -1,
+    "layer3.1.conv1.stored_array_size": 48,
+    "top_1_accuracy": 85.89,
+    "top_5_accuracy": 99.26
+}
