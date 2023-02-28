@@ -1,0 +1,22 @@
+{
+    "halut_layers": "{\"layer4.1.conv2\": [512, -1, 16, \"im2col\"], \"layer4.1.conv1\": [512, -1, 16, \"im2col\"], \"layer4.0.downsample.0\": [64, -1, 16, \"im2col\"], \"layer4.0.conv2\": [512, -1, 16, \"im2col\"], \"layer4.0.conv1\": [256, -1, 16, \"im2col\"], \"layer3.1.conv2\": [256, -1, 16, \"im2col\"], \"layer3.1.conv1\": [256, -1, 16, \"im2col\"], \"layer3.0.downsample.0\": [32, -1, 16, \"im2col\"], \"layer3.0.conv2\": [256, -1, 16, \"im2col\"], \"layer3.0.conv1\": [128, -1, 16, \"im2col\"], \"layer2.1.conv2\": [16, -1, 16, \"kn2col\"], \"layer2.1.conv1\": [16, -1, 16, \"kn2col\"], \"layer2.0.downsample.0\": [16, -1, 16, \"im2col\"], \"layer2.0.conv2\": [16, -1, 16, \"kn2col\"], \"layer2.0.conv1\": [8, -1, 16, \"kn2col\"], \"layer1.1.conv2\": [8, -1, 16, \"kn2col\"], \"layer1.1.conv1\": [8, -1, 16, \"kn2col\"], \"layer1.0.conv2\": [8, -1, 16, \"kn2col\"], \"layer1.0.conv1\": [8, -1, 16, \"kn2col\"]}",
+    "layer4.1.conv2.C": 512,
+    "layer4.1.conv2.H_size": 90112,
+    "layer4.1.conv2.K": 16,
+    "layer4.1.conv2.L_size": 16777216,
+    "layer4.1.conv2.learned_a_shape": [
+        1,
+        4608
+    ],
+    "layer4.1.conv2.learned_b_shape": [
+        4608,
+        512
+    ],
+    "layer4.1.conv2.learned_d": 4608,
+    "layer4.1.conv2.learned_m": 512,
+    "layer4.1.conv2.learned_n": 1,
+    "layer4.1.conv2.rows": -1,
+    "layer4.1.conv2.stored_array_size": 48,
+    "top_1_accuracy": 83.55,
+    "top_5_accuracy": 99.06
+}
