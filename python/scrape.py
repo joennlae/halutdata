@@ -20,7 +20,7 @@ data_json = [json.loads(x) for x in data]
 
 print("keys", data_json[2][0].keys())
 
-pd_data = {
+pd_data = {  # type: ignore
     "model_name": [],
     "accuracy": [],
     "params": [],
