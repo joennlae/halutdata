@@ -10,33 +10,65 @@ reader = SummaryReader(
     },
 )
 
+# dirs = [
+#     "Sep10_12-53-59_vilan1.ee.ethz.chcheckpoints_128_224_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_13-44-12_vilan1.ee.ethz.chcheckpoints_128_248_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_14-56-42_vilan1.ee.ethz.chcheckpoints_128_272_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_16-32-10_vilan1.ee.ethz.chcheckpoints_128_296_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_18-40-36_vilan1.ee.ethz.chcheckpoints_128_320_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_21-05-36_vilan1.ee.ethz.chcheckpoints_128_344_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_23-38-25_vilan1.ee.ethz.chcheckpoints_128_368_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep06_15-53-37_vilan1.ee.ethz.chresnet9-basic-adam_128_200_0.001_cosineannealinglr_adam",
+#     "Sep10_09-59-35_vilan2.ee.ethz.chcheckpoints_128_567_0.0005_cosineannealinglr_adam_resnet9-lpl-0.0005-cont-200-93.6",
+# ]
+#
+# dirs_retraining = [
+#     "Sep10_12-53-59_vilan1.ee.ethz.chcheckpoints_128_224_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_13-44-12_vilan1.ee.ethz.chcheckpoints_128_248_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_14-56-42_vilan1.ee.ethz.chcheckpoints_128_272_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_16-32-10_vilan1.ee.ethz.chcheckpoints_128_296_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_18-40-36_vilan1.ee.ethz.chcheckpoints_128_320_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_21-05-36_vilan1.ee.ethz.chcheckpoints_128_344_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+#     "Sep10_23-38-25_vilan1.ee.ethz.chcheckpoints_128_368_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+# ]
+# dir_default_training = [
+#     "Sep06_15-53-37_vilan1.ee.ethz.chresnet9-basic-adam_128_200_0.001_cosineannealinglr_adam",
+# ]
+# dir_end_training = [
+#     "Sep10_09-59-35_vilan2.ee.ethz.chcheckpoints_128_567_0.0005_cosineannealinglr_adam_resnet9-lpl-0.0005-cont-200-93.6",
+# ]
+
 dirs = [
-    "Sep10_12-53-59_vilan1.ee.ethz.chcheckpoints_128_224_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_13-44-12_vilan1.ee.ethz.chcheckpoints_128_248_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_14-56-42_vilan1.ee.ethz.chcheckpoints_128_272_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_16-32-10_vilan1.ee.ethz.chcheckpoints_128_296_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_18-40-36_vilan1.ee.ethz.chcheckpoints_128_320_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_21-05-36_vilan1.ee.ethz.chcheckpoints_128_344_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_23-38-25_vilan1.ee.ethz.chcheckpoints_128_368_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep06_15-53-37_vilan1.ee.ethz.chresnet9-basic-adam_128_200_0.001_cosineannealinglr_adam",
-    "Sep10_09-59-35_vilan2.ee.ethz.chcheckpoints_128_567_0.0005_cosineannealinglr_adam_resnet9-lpl-0.0005-cont-200-93.6",
+    "Sep28_23-19-04_vilan1.ee.ethz.chresnet9-lr-0.001-amp-lut8-base-2_128_200_0.001_cosineannealinglr_adam_",
+    "Sep29_00-04-08_vilan1.ee.ethz.chcheckpoints_128_223_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_01-57-17_vilan1.ee.ethz.chcheckpoints_128_247_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_04-43-37_vilan1.ee.ethz.chcheckpoints_128_271_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_08-21-45_vilan1.ee.ethz.chcheckpoints_128_295_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_13-34-38_vilan1.ee.ethz.chcheckpoints_128_319_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_19-40-29_vilan1.ee.ethz.chcheckpoints_128_343_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep30_02-00-29_vilan1.ee.ethz.chcheckpoints_128_367_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Oct24_07-15-59_4e835acf0571checkpoints_16_1366_0.0005_cosineannealinglr_adam_resnet9-ft-p100-1000-93.59-x8-16",
 ]
 
 dirs_retraining = [
-    "Sep10_12-53-59_vilan1.ee.ethz.chcheckpoints_128_224_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_13-44-12_vilan1.ee.ethz.chcheckpoints_128_248_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_14-56-42_vilan1.ee.ethz.chcheckpoints_128_272_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_16-32-10_vilan1.ee.ethz.chcheckpoints_128_296_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_18-40-36_vilan1.ee.ethz.chcheckpoints_128_320_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_21-05-36_vilan1.ee.ethz.chcheckpoints_128_344_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
-    "Sep10_23-38-25_vilan1.ee.ethz.chcheckpoints_128_368_0.001_cosineannealinglr_adam_resnet9-lpl-0.001-thresh-25-93.6",
+    "Sep29_00-04-08_vilan1.ee.ethz.chcheckpoints_128_223_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_01-57-17_vilan1.ee.ethz.chcheckpoints_128_247_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_04-43-37_vilan1.ee.ethz.chcheckpoints_128_271_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_08-21-45_vilan1.ee.ethz.chcheckpoints_128_295_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_13-34-38_vilan1.ee.ethz.chcheckpoints_128_319_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep29_19-40-29_vilan1.ee.ethz.chcheckpoints_128_343_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
+    "Sep30_02-00-29_vilan1.ee.ethz.chcheckpoints_128_367_0.001_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-25-93.59",
 ]
+
 dir_default_training = [
-    "Sep06_15-53-37_vilan1.ee.ethz.chresnet9-basic-adam_128_200_0.001_cosineannealinglr_adam",
+    "Sep28_23-19-04_vilan1.ee.ethz.chresnet9-lr-0.001-amp-lut8-base-2_128_200_0.001_cosineannealinglr_adam_",
 ]
+
 dir_end_training = [
-    "Sep10_09-59-35_vilan2.ee.ethz.chcheckpoints_128_567_0.0005_cosineannealinglr_adam_resnet9-lpl-0.0005-cont-200-93.6",
+    # "Sep30_10-18-51_vilan1.ee.ethz.chcheckpoints_128_666_0.0005_cosineannealinglr_adam_resnet9-lpl-int8-lut-ste-amp-cont-300-93.59",
+    "Oct24_07-15-59_4e835acf0571checkpoints_16_1366_0.0005_cosineannealinglr_adam_resnet9-ft-p100-1000-93.59-x8-16"
 ]
+print(reader)
 df = reader.scalars
 filtered_df = df[df["dir_name"].isin(dirs)]
 print(filtered_df)
@@ -84,7 +116,7 @@ fig, axes = plt.subplots(2, 2, figsize=(5.5, 4))
 ax = axes[0, 0]
 # plot test accuracy
 # use same y axis for the top two plots
-ax.set_ylim([60, 102])
+ax.set_ylim([70, 102])
 # add grid
 ax.grid(True, linestyle="--", linewidth=0.5, color="gray")
 # set title
@@ -109,7 +141,7 @@ for dir in dirs:
         color=get_hue_color(get_hue(dir)),
         label="",
     )
-ax.set_ylim([60, 102])
+ax.set_ylim([70, 102])
 
 # plot the third plot in the bottom left corner
 ax = axes[1, 0]
