@@ -1,0 +1,5 @@
+{
+    "halut_layers": "{\"third_stack.residual\": [8, 16, \"im2col\"], \"third_stack.block.3\": [64, 16, \"im2col\"], \"third_stack.block.0\": [32, 16, \"im2col\"], \"second_stack.residual\": [4, 16, \"im2col\"], \"second_stack.block.3\": [32, 16, \"im2col\"], \"second_stack.block.0\": [16, 16, \"im2col\"], \"first_stack.block.3\": [16, 16, \"im2col\"], \"first_stack.block.0\": [16, 16, \"im2col\"]}",
+    "top_1_accuracy": 46.51,
+    "top_5_accuracy": 93.34
+}

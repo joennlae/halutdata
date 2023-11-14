@@ -1,0 +1,5 @@
+{
+    "halut_layers": "{\"layer2.1.conv1\": [32, 16, \"im2col\"], \"layer2.0.conv2\": [32, 16, \"im2col\"], \"layer2.0.conv1\": [16, 16, \"im2col\"], \"layer1.2.conv2\": [16, 16, \"im2col\"], \"layer1.2.conv1\": [16, 16, \"im2col\"], \"layer1.1.conv2\": [16, 16, \"im2col\"], \"layer1.1.conv1\": [16, 16, \"im2col\"], \"layer1.0.conv2\": [16, 16, \"im2col\"], \"layer1.0.conv1\": [16, 16, \"im2col\"]}",
+    "top_1_accuracy": 52.64,
+    "top_5_accuracy": 92.34
+}

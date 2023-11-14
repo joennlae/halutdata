@@ -1,0 +1,5 @@
+{
+    "halut_layers": "{\"conv3.0\": [128, 16, \"im2col\"], \"conv4.0\": [256, 16, \"im2col\"]}",
+    "top_1_accuracy": 40.0,
+    "top_5_accuracy": 88.25
+}

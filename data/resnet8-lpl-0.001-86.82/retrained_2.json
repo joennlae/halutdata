@@ -1,0 +1,5 @@
+{
+    "halut_layers": "{\"first_stack.block.3\": [16, 16, \"im2col\"], \"first_stack.block.0\": [16, 16, \"im2col\"]}",
+    "top_1_accuracy": 37.4,
+    "top_5_accuracy": 86.72
+}

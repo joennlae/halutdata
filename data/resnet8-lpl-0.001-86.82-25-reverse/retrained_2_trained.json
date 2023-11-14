@@ -1,0 +1,5 @@
+{
+    "halut_layers": "{\"third_stack.block.3\": [64, 16, \"im2col\"], \"third_stack.residual\": [8, 16, \"im2col\"]}",
+    "top_1_accuracy": 80.7,
+    "top_5_accuracy": 99.16
+}
